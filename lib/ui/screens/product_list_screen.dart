@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import 'product_detail_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -102,11 +103,20 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                     final product = provider.products[index];
                     return ListTile(
-                      leading: Image.network(
-                        product.thumbnail,
+                      leading: CachedNetworkImage(
+                        imageUrl: product.thumbnail,
                         width: 56,
                         height: 56,
                         fit: BoxFit.cover,
+                        placeholder: (context, url) => const SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.broken_image, size: 40),
                       ),
                       title: Text(product.title),
                       subtitle: Text('\$${product.price.toStringAsFixed(2)}'),

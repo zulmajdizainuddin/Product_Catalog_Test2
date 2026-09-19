@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../data/models/product.dart';
 
 class ProductDetailScreen extends StatelessWidget {
@@ -19,9 +20,13 @@ class ProductDetailScreen extends StatelessWidget {
               child: PageView.builder(
                 itemCount: product.images.length,
                 itemBuilder: (context, index) {
-                  return Image.network(
-                    product.images[index],
+                  return CachedNetworkImage(
+                    imageUrl: product.images[index],
                     fit: BoxFit.contain,
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.broken_image, size: 60),
                   );
                 },
               ),
