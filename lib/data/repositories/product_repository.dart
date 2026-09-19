@@ -9,4 +9,8 @@ class ProductRepository {
   Future<List<Product>> getProducts({int limit = 20, int skip = 0}) {
     return _apiService.fetchProducts(limit: limit, skip: skip);
   }
+
+  Future<List<Product>> searchProducts(String query) {
+    return _apiService.searchProducts(query);
+  }
 }

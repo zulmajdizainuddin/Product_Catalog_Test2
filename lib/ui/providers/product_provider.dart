@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/product_repository.dart';
@@ -24,6 +25,9 @@ class ProductProvider extends ChangeNotifier {
   bool _isLoadingMore = false;
 
   bool get isLoadingMore => _isLoadingMore;
+
+  Timer? _debounce;
+  String _searchQuery = '';
 
   Future<void> loadProducts() async {
     _state = ViewState.loading;
@@ -62,5 +66,42 @@ class ProductProvider extends ChangeNotifier {
 
     _isLoadingMore = false;
     notifyListeners();
+  }
+
+  void onSearchChanged(String query) {
+    _searchQuery = query;
+
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (query.trim().isEmpty) {
+        loadProducts();
+      } else {
+        _performSearch(query);
+      }
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    _state = ViewState.loading;
+    notifyListeners();
+
+    try {
+      final result = await _repository.searchProducts(query);
+      _products = result;
+      _hasMore = false;
+      _state = _products.isEmpty ? ViewState.empty : ViewState.success;
+    } catch (e) {
+      _errorMessage = 'Something went wrong. Please try again.';
+      _state = ViewState.error;
+    }
+
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 }
