@@ -27,7 +27,6 @@ class ProductProvider extends ChangeNotifier {
   bool get isLoadingMore => _isLoadingMore;
 
   Timer? _debounce;
-  String _searchQuery = '';
 
   Future<void> loadProducts() async {
     _state = ViewState.loading;
@@ -69,8 +68,6 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void onSearchChanged(String query) {
-    _searchQuery = query;
-
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 500), () {
