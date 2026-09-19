@@ -18,19 +18,49 @@ class ProductProvider extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
+  int _skip = 0;
+  final int _limit = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  bool get isLoadingMore => _isLoadingMore;
+
   Future<void> loadProducts() async {
     _state = ViewState.loading;
+    _skip = 0;
+    _hasMore = true;
     notifyListeners();
 
     try {
-      final result = await _repository.getProducts(limit: 20, skip: 0);
+      final result = await _repository.getProducts(limit: _limit, skip: _skip);
       _products = result;
+      _skip = _limit;
+      _hasMore = result.length == _limit;
       _state = _products.isEmpty ? ViewState.empty : ViewState.success;
     } catch (e) {
       _errorMessage = 'Something went wrong. Please try again.';
       _state = ViewState.error;
     }
 
+    notifyListeners();
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final result = await _repository.getProducts(limit: _limit, skip: _skip);
+      _products.addAll(result);
+      _skip += _limit;
+      _hasMore = result.length == _limit;
+    } catch (e) {
+      // Keep existing products if a page fails to load
+    }
+
+    _isLoadingMore = false;
     notifyListeners();
   }
 }

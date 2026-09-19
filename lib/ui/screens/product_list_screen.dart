@@ -2,8 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 
-class ProductListScreen extends StatelessWidget {
+class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
+
+  @override
+  State<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final provider = context.read<ProductProvider>();
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      provider.loadMoreProducts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +63,18 @@ class ProductListScreen extends StatelessWidget {
 
             case ViewState.success:
               return ListView.builder(
-                itemCount: provider.products.length,
+                controller: _scrollController,
+                itemCount: provider.products.length + 1,
                 itemBuilder: (context, index) {
+                  if (index == provider.products.length) {
+                    return provider.isLoadingMore
+                        ? const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : const SizedBox.shrink();
+                  }
+
                   final product = provider.products[index];
                   return ListTile(
                     leading: Image.network(
