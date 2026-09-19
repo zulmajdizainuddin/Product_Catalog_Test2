@@ -85,40 +85,43 @@ class _ProductListScreenState extends State<ProductListScreen> {
               return const Center(child: Text('No products found.'));
 
             case ViewState.success:
-              return ListView.builder(
-                controller: _scrollController,
-                itemCount: provider.products.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == provider.products.length) {
-                    return provider.isLoadingMore
-                        ? const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        : const SizedBox.shrink();
-                  }
+              return RefreshIndicator(
+                onRefresh: () => provider.loadProducts(),
+                child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: provider.products.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == provider.products.length) {
+                      return provider.isLoadingMore
+                          ? const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : const SizedBox.shrink();
+                    }
 
-                  final product = provider.products[index];
-                  return ListTile(
-                    leading: Image.network(
-                      product.thumbnail,
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(product.title),
-                    subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ProductDetailScreen(product: product),
-                        ),
-                      );
-                    },
-                  );
-                },
+                    final product = provider.products[index];
+                    return ListTile(
+                      leading: Image.network(
+                        product.thumbnail,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(product.title),
+                      subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductDetailScreen(product: product),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               );
           }
         },
