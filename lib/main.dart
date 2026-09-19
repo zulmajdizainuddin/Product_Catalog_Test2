@@ -22,7 +22,14 @@ class MyApp extends StatelessWidget {
       create: (_) => ProductProvider(repository)..loadProducts(),
       child: MaterialApp(
         title: 'Product Catalog',
-        theme: ThemeData(primarySwatch: Colors.blue),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFFFF7043),
+            brightness: Brightness.light,
+          ),
+          scaffoldBackgroundColor: const Color(0xFFFFF8F5),
+          useMaterial3: true,
+        ),
         debugShowCheckedModeBanner: false,
         home: const ProductListScreen(),
       ),
